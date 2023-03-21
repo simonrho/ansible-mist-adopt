@@ -1,0 +1,36 @@
+---
+- name: Adopt Juniper devices
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Get Mist API response
+      uri:
+        url: "https://api.mist.com/api/v1/orgs/{{ org_id }}/ocdevices/outbound_ssh_cmd{{ '?site_id=' + site_id if (site_id is defined) and (site_id | length > 0) }}"
+        method: GET
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Token {{ mist_api_key }}"
+        return_content: yes
+        status_code: 200
+      register: mist_api_response
+      delegate_to: localhost
+
+    - name: Extract SSH commands from Mist API response
+      set_fact:
+        ssh_commands: "{{ mist_api_response.json.cmd.split('\n') }}"
+
+    - name: Remove 'delete system phone-home' command if delete_phone_home is true
+      set_fact:
+        ssh_commands: "{{ ssh_commands | reject('equalto', 'delete system phone-home') | list }}"
+      when: delete_phone_home | default(true) | bool
+
+    - name: Adopt and configure Juniper device
+      junipernetworks.junos.junos_config:
+        lines: "{{ ssh_commands }}"
+      register: juniper_config
+
+    - name: Exit with result
+      ansible.builtin.debug:
+        msg: "Successfully adopted and configured the Juniper device."
+      when: juniper_config is changed
+
