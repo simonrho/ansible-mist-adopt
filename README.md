@@ -23,6 +23,18 @@ ansible_network_os=junipernetworks.junos.junos
 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 mist_api_key=ExampleAPIKey1234
 ```
+
+## Mist API Key
+Steps to obtain the MIST API key.
+1. Log in to your Mist account.
+2. Select the desired organization. 
+3. Navigate to organization settings. 
+4. Find the API Token section. 
+5. Click "Create Token."
+6. Choose the appropriate access level. 
+7. Set site access preferences. 
+8. Generate and securely store the API key.
+
 ## Usage
 
 Run the playbook with the provided inventory file:
@@ -46,7 +58,7 @@ Example:
 ansible-playbook -i inventory.ini adopt.yaml -e delete_phone_home=false
 ```
 
-### Run example
+## Run example
 ```bash
 ansible-playbook -i inventory.ini adopt.yaml 
 
